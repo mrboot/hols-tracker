@@ -36,7 +36,7 @@ class DataTable extends Component {
   }
 
   render() {
-    const { data } = this.props;
+    const { holidays } = this.props;
     return (
       <table className={tableStyles} >
         <thead>
@@ -48,7 +48,7 @@ class DataTable extends Component {
           </tr>
         </thead>
         <tbody>
-          {data.map(entry =>
+          {holidays.map(entry =>
             <tr key={entry.id}>
               <td>{this.displayDays(entry.balance)}</td>
               <td>{this.displayDates(entry.hol_start_date, entry.hol_end_date)}</td>
