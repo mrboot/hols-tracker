@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { hydrate, injectGlobal } from 'react-emotion';
-import DataTable from '../components/DataTable';
+import HolidayTable from '../components/HolidayTable';
 import firebase from '../firestore';
+import AddHoliday from '../components/AddHoliday';
 
 // Adds server generated styles to emotion cache.
 // '__NEXT_DATA__.ids' is set in '_document.js'
@@ -13,7 +14,7 @@ class Index extends Component {
 
   state = {
     holidays: this.props.holidays,
-    loading: false
+    updated: false
   }
   // static async getInitialProps() {
   // const data = [
@@ -27,7 +28,7 @@ class Index extends Component {
   // return { data }
   // }
   static async getInitialProps() {
-    const collection = await firebase.collection('holidays').get();
+    const collection = await firebase.collection('holidays').orderBy('hol_start_date').get();
     const holidays = await collection.docs.map(doc => {
       const holData = doc.data();
       return { id: doc.id, ...holData }
@@ -35,27 +36,34 @@ class Index extends Component {
     return { holidays }
   }
 
-  // componentDidMount() {
-  //   firebase
-  //     .collection('holidays')
-  //     .get()
-  //     .then(collection => {
-  //       const holidays = collection.docs.map(doc => doc.data())
-  //       this.setState({ holidays })
-  //     })
-  // }
+  async componentDidUpdate(prevProps, prevState) {
+    const collection = await firebase.collection('holidays').orderBy('hol_start_date').get();
+    const holidays = await collection.docs.map(doc => {
+      const holData = doc.data();
+      return { id: doc.id, ...holData }
+    });
+    this.setState({ holidays, updated: false })
+  }
 
-  // componentWillUnmount() {
-  //   db.close();
-  // }
+
+  setUpdated = () => {
+    this.setState({ updated: true });
+  }
+
+  lastBalance = (hols) => {
+    const balances = hols.map(hol => hol.balance);
+    return Math.min(...balances);
+  }
 
   render() {
     const { holidays } = this.state
+    const lastBal = this.lastBalance(holidays)
     return (
       <div>
         <h1>Holiday Balance Tracker</h1>
         <h3>Holiday year runs from April 1st to March 31st</h3>
-        <DataTable holidays={holidays} />
+        <HolidayTable holidays={holidays} />
+        <AddHoliday lastBalance={lastBal} onAddRefresh={this.setUpdated} />
       </div>
     )
   }

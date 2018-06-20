@@ -11,7 +11,7 @@ if (typeof window !== 'undefined') {
   hydrate(window.__NEXT_DATA__.ids)
 }
 
-class DataTable extends Component {
+class HolidayTable extends Component {
 
   hoursToDays = (hours) => {
     return hours / 8;
@@ -62,7 +62,7 @@ class DataTable extends Component {
   }
 }
 
-export default DataTable;
+export default HolidayTable;
 
 const tableStyles = css`
   border-collapse: collapse;
