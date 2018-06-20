@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
-import firebase from '../firestore';
+import db from '../firestore';
 
 class AddHoliday extends Component {
 
 
   addHolidayToDB = (data) => {
-    firebase.collection('holidays').add(data);
+    db.collection('holidays').add(data);
   }
 
   daysToHours = (numDays) => {

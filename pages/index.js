@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { hydrate, injectGlobal } from 'react-emotion';
 import HolidayTable from '../components/HolidayTable';
-import firebase from '../firestore';
+import db from '../firestore';
 import AddHoliday from '../components/AddHoliday';
 
 // Adds server generated styles to emotion cache.
@@ -28,7 +28,7 @@ class Index extends Component {
   // return { data }
   // }
   static async getInitialProps() {
-    const collection = await firebase.collection('holidays').orderBy('hol_start_date').get();
+    const collection = await db.collection('holidays').orderBy('hol_start_date').get();
     const holidays = await collection.docs.map(doc => {
       const holData = doc.data();
       return { id: doc.id, ...holData }
@@ -36,13 +36,15 @@ class Index extends Component {
     return { holidays }
   }
 
-  async componentDidUpdate(prevProps, prevState) {
-    const collection = await firebase.collection('holidays').orderBy('hol_start_date').get();
-    const holidays = await collection.docs.map(doc => {
-      const holData = doc.data();
-      return { id: doc.id, ...holData }
-    });
-    this.setState({ holidays, updated: false })
+  async componentDidUpdate() {
+    if (this.state.updated) {
+      const collection = await db.collection('holidays').orderBy('hol_start_date').get();
+      const holidays = await collection.docs.map(doc => {
+        const holData = doc.data();
+        return { id: doc.id, ...holData }
+      });
+      this.setState({ holidays, updated: false })
+    }
   }
 
 
@@ -51,8 +53,9 @@ class Index extends Component {
   }
 
   lastBalance = (hols) => {
-    const balances = hols.map(hol => hol.balance);
-    return Math.min(...balances);
+    // const balances = hols.map(hol => hol.balance);
+    // return Math.min(...balances);
+    return hols.reduce((min, h) => h.balance < min ? h.balance : min, hols[0].balance);
   }
 
   render() {
