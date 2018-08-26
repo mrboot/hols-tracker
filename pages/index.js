@@ -47,7 +47,6 @@ class Index extends Component {
     }
   }
 
-
   setUpdated = () => {
     this.setState({ updated: true });
   }
