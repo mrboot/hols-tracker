@@ -1,21 +1,27 @@
-import React, { Component } from 'react';
-import { hydrate, injectGlobal } from 'react-emotion';
-import HolidayTable from '../components/HolidayTable';
-import db from '../firestore';
-import AddHoliday from '../components/AddHoliday';
+/* eslint react/no-did-update-set-state: 0 */
+import React, { Component } from "react";
+import { hydrate, injectGlobal } from "react-emotion";
+import HolidayTable from "../components/HolidayTable";
+import db from "../firestore";
+import AddHoliday from "../components/AddHoliday";
 
 // Adds server generated styles to emotion cache.
 // '__NEXT_DATA__.ids' is set in '_document.js'
-if (typeof window !== 'undefined') {
-  hydrate(window.__NEXT_DATA__.ids)
+if (typeof window !== "undefined") {
+  hydrate(window.__NEXT_DATA__.ids);
 }
 
 class Index extends Component {
+  state = this.getInitialState();
 
-  state = {
-    holidays: this.props.holidays,
-    updated: false
+  getInitialState() {
+    const { holidays } = this.props;
+    return {
+      holidays,
+      updated: false
+    };
   }
+
   // static async getInitialProps() {
   // const data = [
   //   { id: 1, description: 'Opening balance', hol_start_date: '2018-04-01', hol_end_date: '', duration: 0, balance: 200 },
@@ -28,38 +34,47 @@ class Index extends Component {
   // return { data }
   // }
   static async getInitialProps() {
-    const collection = await db.collection('holidays').orderBy('hol_start_date').get();
+    const collection = await db
+      .collection("holidays")
+      .orderBy("hol_start_date")
+      .get();
     const holidays = await collection.docs.map(doc => {
       const holData = doc.data();
-      return { id: doc.id, ...holData }
+      return { id: doc.id, ...holData };
     });
-    return { holidays }
+    return { holidays };
   }
 
   async componentDidUpdate() {
-    if (this.state.updated) {
-      const collection = await db.collection('holidays').orderBy('hol_start_date').get();
+    const { updated } = this.state;
+    if (updated) {
+      const collection = await db
+        .collection("holidays")
+        .orderBy("hol_start_date")
+        .get();
       const holidays = await collection.docs.map(doc => {
         const holData = doc.data();
-        return { id: doc.id, ...holData }
+        return { id: doc.id, ...holData };
       });
-      this.setState({ holidays, updated: false })
+      this.setState({ holidays, updated: false });
     }
   }
 
   setUpdated = () => {
     this.setState({ updated: true });
-  }
+  };
 
-  lastBalance = (hols) => {
+  lastBalance = hols =>
     // const balances = hols.map(hol => hol.balance);
     // return Math.min(...balances);
-    return hols.reduce((min, h) => h.balance < min ? h.balance : min, hols[0].balance);
-  }
+    hols.reduce(
+      (min, h) => (h.balance < min ? h.balance : min),
+      hols[0].balance
+    );
 
   render() {
-    const { holidays } = this.state
-    const lastBal = this.lastBalance(holidays)
+    const { holidays } = this.state;
+    const lastBal = this.lastBalance(holidays);
     return (
       <div>
         <h1>Holiday Balance Tracker</h1>
@@ -67,11 +82,11 @@ class Index extends Component {
         <HolidayTable holidays={holidays} />
         <AddHoliday lastBalance={lastBal} onAddRefresh={this.setUpdated} />
       </div>
-    )
+    );
   }
 }
 
-export default Index
+export default Index;
 
 // Styling
 
@@ -84,5 +99,4 @@ injectGlobal`
     font-family: Helvetica, Arial, sans-serif;
     font-size: 24px;
   }
-`
-
+`;
